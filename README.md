@@ -8,3 +8,9 @@ This is a simple Eisenhower-Matrix for priotising your daily Tasks. The Goal was
 No installation is necessary. Just download the file and run it. 
 
 If you want to save your tasks in a later session or continue them on another device, you can do so via ‘Save Tasks’ in the upper right corner. There you can also import the tasks again. 
+
+
+![image](https://github.com/user-attachments/assets/1e6602f1-f61a-4ce8-b3cf-17b8a3857bb1)
+
+
+git clone https://github.com/Perspecter/Eisenhower-Matrix
