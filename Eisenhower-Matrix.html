@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eisenhower Matrix</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+    <style>
+
+        /*Created bei Pascal Baumann 27.09.2024 */
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #232528;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            background-color: #7019297a;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header Left Side */
+        .left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Left Side Buttons and Stopwatch */
+
+        .stopwatch {
+            font-size: 1.5em;
+            margin-right: 20px;
+            color: #ffffff;
+        }
+
+        /* Task-Selector for Stoppwatch */
+        #taskSelector {
+            background-color: #3d4045a4;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .header-button {
+            background-color: #3d4045a4;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            height: 42px;
+        }
+
+        .header-button:hover {
+            background-color: #3d4045;
+        }
+
+        .center-section {
+            display: flex;
+            text-align: center;
+            align-content: center;
+            flex-grow: 1;
+        }
+
+        /* Button "Add Task" */
+        .new-task-button {
+            background-color: #28a745;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .new-task-button:hover {
+            background-color: #218838;
+        }
+
+        .new-task-button span {
+            margin-left: 10px;
+        }
+
+
+
+         /* Buttons on right Header side */
+        .right-section {
+            display: flex;
+            align-items: center;
+            margin-right: 30px; /* Space to the right */
+        }
+
+        /* Customize Drop-Down Style für Import/Export */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 1;
+            width:200px; /* Adjust the width of the dropdown here */
+        }
+
+        .dropdown-content .dropdown-item {
+            background-color: #3d4045a4;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            width: 100%; /* Ensures each button fills the dropdown width */
+            text-align: center;
+            box-sizing: border-box; /* Ensures padding is included in width */
+            font-size: 14px; /* Set font size for consistency */
+        }
+
+        .dropdown-content .dropdown-item:hover {
+            background-color: #3d4045;
+        }
+
+        /* Hidden File Input */
+        .file-upload {
+            display: none;
+        }
+
+        /* Custom file upload button to match the others */
+        .custom-file-upload {
+            background-color: #3d4045a4;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%; /* Same width as other dropdown buttons */
+            text-align: center;
+            margin-bottom: 5px;
+            display: inline-block;
+            box-sizing: border-box; /* Ensure padding is included in width */
+            font-size: 14px; /* Set font size for consistency */
+        }
+
+        .custom-file-upload:hover {
+            background-color: #3d4045;
+        }
+
+        .dropdown-content input[type="file"] {
+            background-color: #3d4045a4;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        /* Input in Button Style */
+        input[type="file"] {
+            background-color: #3d4045a4;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+
+
+
+        /* Main Container for Eisenhower-Matrix */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-gap: 20px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-grow: 1; /* This makes sure it takes up the remaining space */
+        }
+
+        .title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .quadrants {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+        }
+
+        .side {
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+        }
+
+        .quadrant, .side-rect {
+            background-color: #3d4045a4;
+            border: 1px solid #71717c;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            align-items: center;
+            height: 300px; /* Reduced height */
+            overflow-y: auto;
+            overflow-x: visible;
+        }
+
+        .quadrant:hover, .side-rect:hover {
+            background-color: #3d4045;
+        }
+
+        .side-rect {
+            height: 655px; /* Reduced height */
+        }
+
+
+
+
+        /* Customizing of the Tasks */
+        .task {
+            width: 360px;
+            background-color: #7019297a;
+            
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            color: #ffffff;
+            cursor: move;
+            transition: background-color 0.3s, transform 0.2s;
+            font-family: 'Arial', sans-serif;
+            height: 80px;
+            box-sizing: border-box;
+        }
+
+        .task:hover {
+            background-color: #701929b7;
+            transform: translateY(-5px);
+        }
+
+        .task strong {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: block;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        .task .estimated-time {
+            text-align: left;
+            margin-top: 10px;
+        }
+
+
+
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15); /* Transparent background */
+            backdrop-filter: blur(10px); /* Background blur effect */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border to give glass look */
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px; /* Ensures all elements inside have a consistent width */
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .modal-label {
+            font-weight: bold;
+        }
+
+        .modal-input, textarea, select {
+            width: 100%; /* Ensures all input fields take the full width */
+            padding: 8px;
+            margin: 10px 0;
+            background-color: #7019297a;
+            border: 1px solid #0b0809af;
+            border-radius: 5px;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            box-sizing: border-box; /* Ensures padding is included in the element's total width */
+        }
+
+        .modal-input::placeholder, textarea::placeholder, select::placeholder {
+            color: #ffffff; /* White color for placeholder text */
+            opacity: 1; /* Ensure the placeholder is fully visible */
+        }
+
+        .duration-input {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .duration-input button {
+            background-color: #1a154a;
+            border: none;
+            color: #ffffff;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .duration-input button:hover {
+            background-color: #1a154a;
+        }
+
+        .submit-button, .modal-button {
+            width: 100%; /* Ensures buttons take full width */
+            background-color: #28a745;
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            box-sizing: border-box; /* Ensures padding is included in the element's total width */
+        }
+
+        .cancel-button {
+            width: 100%; /* Ensures buttons take full width */
+            background-color: #a51818a5;
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            box-sizing: border-box; /* Ensures padding is included in the element's total width */
+        }
+        .cancel-button:hover{
+            background-color:#a51818 ;
+        }
+
+        .submit-button:hover, .modal-button:hover {
+            background-color: #218838;
+        }
+
+        .new-task-button, .submit-button, .modal-button {
+            background-color: rgba(40, 167, 69, 0.7); /* Semi-transparent green */
+            border: 1px solid rgba(40, 167, 69, 0.5);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .new-task-button:hover, .submit-button:hover, .modal-button:hover {
+            background-color: rgba(40, 167, 69, 0.9); /* Darken on hover */
+            border-color: rgba(40, 167, 69, 0.7);
+        }
+
+        /* Button for in/decrease estimated Time */
+        .adjust-button {
+            background-color: #3d4045a4;
+            border: none;
+            color: #ffffff;
+        }
+
+        .adjust-button:hover{
+            background-color:#3d4045f8 ;
+        }
+
+
+        /* Additional Styles for Task Details */
+        /* Small Delete Button */
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 60px;
+            background-color: transparent;
+            border: none;
+            font-size: 1.5em; /* Adjust size */
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        /* Small Calendar Button */
+        .calendar-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            font-size: 1.5em; /* Adjust size */
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+
+
+
+<!-- Header with buttons and stopwatch -->
+<div class="header">
+    <div class="left-section">
+        <!--Header left side. Stopwatch + Buttons-->
+        <span class="stopwatch" id="stopwatch">00:00:00</span>
+        <button class="header-button" onclick="startStopwatch()">Start</button>
+        <button class="header-button" onclick="stopStopwatch()">Stop</button>
+        <select id="taskSelector">
+            <option value="">Select Task</option>
+        </select>
+        <button class="header-button" onclick="saveTime()">Save Time</button>
+        <button class="header-button" onclick="resetStopwatch()">Reset</button>
+    </div>
+    
+    <div class="center-section">
+        <button class="new-task-button" onclick="openNewTaskModal()">Add new Task</button>
+    </div>
+    
+
+    <div class="right-section">
+        <!-- Import/Export Button -->
+        <div class="dropdown">
+            <button class="header-button" id="importExportButton" onclick="toggleDropdown()">Import/Export</button>
+            <div class="dropdown-content" id="importExportMenu">
+                <button class="dropdown-item" onclick="saveTasks()">Save Tasks</button>
+                <button class="dropdown-item" onclick="exportToExcel()">Excel Export</button>
+                <!-- Custom file upload button -->
+                <label for="loadTasksInput" class="custom-file-upload">Upload File</label>
+                <input type="file" id="loadTasksInput" class="file-upload" onchange="loadTasks(event)">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Main Container for Backlog and Eisenhower-Matrix-->
+<div class="main-container">
+    <!-- Backlog Column -->
+    <div class="side">
+        <div class="side-rect" id="backlog">
+            <div class="title">Backlog</div>
+        </div>
+    </div>
+
+    <!-- Eisenhower Matrix -->
+    <div class="quadrants">
+        <div class="quadrant" id="urgent-important">
+            <div class="title">Urgent - Important</div>
+        </div>
+        <div class="quadrant" id="urgent-not-important">
+            <div class="title">Urgent - Not Important</div>
+        </div>
+        <div class="quadrant" id="not-urgent-important">
+            <div class="title">Not urgent - Important</div>
+        </div>
+        <div class="quadrant" id="not-urgent-not-important">
+            <div class="title">Not urgent - Not important</div>
+        </div>
+    </div>
+
+    <!-- Completed Tasks Column -->
+    <div class="side">
+        <div class="side-rect" id="done-tasks">
+            <div class="title">Completed Tasks</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit Task Modal -->
+<div id="taskModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Task Details</div>
+
+        <!-- Delete Button -->
+        <button class="delete-button" onclick="deleteTask()">🚮</button>
+
+        <!-- Calendar Button -->
+        <button class="calendar-button" onclick="openCalendarModal()">🗓️</button>
+
+        <div>
+            <label class="modal-label">Task Name</label>
+            <input type="text" id="taskName" class="modal-input">
+        </div>
+        <div>
+            <label class="modal-label">Description</label>
+            <textarea id="taskDescription" class="modal-input" style="height: 150px;"></textarea>
+        </div>
+        <div class="duration-input">
+            <label class="modal-label">Estimated Time</label>
+            <button class="adjust-button" onclick="decreaseDuration()">-</button>
+            <span id="estimatedDuration"></span>
+            <button class="adjust-button" onclick="increaseDuration()">+</button>
+        </div>
+        <br>
+        <div>
+            <label class="modal-label">Time already invested</label>
+            <span id="timeInvested">00:00:00</span>
+        </div>
+        <button class="submit-button" onclick="applyChanges()">Accept</button>
+        <button class="cancel-button" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+
+<!-- Calendar Modal -->
+<div id="calendarModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Add to Calendar</div>
+        <div>
+            <label class="modal-label">Select Date</label>
+            <input type="date" id="calendarDate" class="modal-input">
+        </div>
+        <div>
+            <label class="modal-label">Start Time</label>
+            <input type="time" id="calendarStartTime" class="modal-input">
+        </div>
+        <div>
+            <label class="modal-label">Estimated Time</label>
+            <span id="calendarEstimatedDuration"></span>
+        </div>
+        <button class="submit-button" onclick="exportToCalendar()">Export as .ics</button>
+        <button class="cancel-button" onclick="closeCalendarModal()">Cancel</button>
+    </div>
+</div>
+
+
+
+
+<!-- New Task Modal -->
+<div id="newTaskModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Add new Task</div>
+        <div>
+            <label class="modal-label">Name of the Task</label>
+            <input type="text" id="newTaskName" class="modal-input" placeholder="Name the Task">
+        </div>
+        <div>
+            <label class="modal-label">Description (optional)</label>
+            <textarea id="newTaskDescription" class="modal-input" style="height: 150px;" placeholder="Description (optional)"></textarea>
+        </div>
+        <div class="duration-input">
+            <label class="modal-label">Estimated Time</label>
+            <button class="adjust-button" onclick="decreaseNewTaskDuration()">-</button>
+            <span id="newTaskEstimatedDuration">1h</span>
+            <button class="adjust-button" onclick="increaseNewTaskDuration()">+</button>
+        </div>
+        <div>
+            <label class="modal-label">Position</label>
+            <select id="taskPosition" class="modal-input">
+                <option value="backlog">Backlog</option>
+                <option value="urgent-important">Urgent-Important</option>
+                <option value="urgent-not-important">Urgent-Not-Important</option>
+                <option value="not-urgent-important">Not-Urgent-Important</option>
+                <option value="not-urgent-not-important">Not-Urgent-Not-Important</option>
+            </select>
+        </div>
+        <button class="submit-button" onclick="createNewTask()">Create</button>
+        <button class="cancel-button" onclick="closeNewTaskModal()">Cancel</button>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script>
+    let currentDuration = 60;
+    let currentTaskElement = null;
+
+    let newTaskDuration = 60;
+    let taskIdCounter = 1;
+    let stopwatchInterval;
+    let stopwatchTime = 0;
+    let elapsedTime = 0;
+    let selectedTask = null;
+    let isVisible = true;
+    let lastUpdateTime = Date.now();
+    let isRunning = false;
+
+
+
+    // Functions for Timer
+    function formatTime(time) {
+        const hours = Math.floor(time / 3600).toString().padStart(2, '0');
+        const minutes = Math.floor((time % 3600) / 60).toString().padStart(2, '0');
+        const seconds = (time % 60).toString().padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Start the stopwatch
+    function startStopwatch() {
+        const selectedTaskId = document.getElementById('taskSelector').value;
+        if (!selectedTaskId) {
+            alert("Please select a task.");
+            return;
+        }
+
+        if (!isRunning) {
+            stopwatchStartTime = Date.now() - elapsedTime; // Save start time adjusted for previous elapsed time
+            stopwatchInterval = requestAnimationFrame(updateStopwatch);
+            isRunning = true;
+        }
+    }
+
+
+    // Update the stopwatch
+    function updateStopwatch() {
+        elapsedTime = Date.now() - stopwatchStartTime;
+        document.getElementById('stopwatch').innerText = formatTime(Math.floor(elapsedTime / 1000));
+        if (isRunning) {
+            stopwatchInterval = requestAnimationFrame(updateStopwatch); // Keep updating as long as it's running
+        }
+    }
+
+    // Stop the stopwatch
+    function stopStopwatch() {
+        isRunning = false;
+        cancelAnimationFrame(stopwatchInterval);
+    }
+
+    // Reset the stopwatch
+    function resetStopwatch() {
+        stopStopwatch();
+        elapsedTime = 0;
+        document.getElementById('stopwatch').innerText = formatTime(0);
+    }
+
+    function formatTime(time) {
+        const hours = Math.floor(time / 3600).toString().padStart(2, '0');
+        const minutes = Math.floor((time % 3600) / 60).toString().padStart(2, '0');
+        const seconds = (time % 60).toString().padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Save the current time invested in a task
+    function saveTime() {
+        const selectedTaskId = document.getElementById('taskSelector').value;
+        if (!selectedTaskId) {
+            alert("No task selected.");
+            return;
+        }
+
+        const selectedTask = document.querySelector(`.task[data-id='${selectedTaskId}']`);
+        selectedTask.setAttribute('data-time-invested', Math.floor(elapsedTime / 1000));
+        alert("Time saved for the task.");
+    }
+
+    // Handle tab visibility changes
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            lastUpdateTime = Date.now(); // Reset the last update time when the tab becomes visible
+        }
+    });
+
+
+
+
+    // Excel-Export Function
+    function exportToExcel() {
+        const tasks = [];
+
+        // Put all Tasks in Array
+        document.querySelectorAll(".task").forEach(task => {
+            tasks.push({
+                id: task.getAttribute("data-id"),
+                name: task.getAttribute("data-task-name"),
+                description: task.getAttribute("data-task-description"),
+                estimatedTime: task.getAttribute("data-estimated-duration"),
+                investedTime: task.getAttribute("data-time-invested"),
+                position: task.closest(".quadrant, .side-rect").id
+            });
+        });
+
+        // Create a new Worksheet
+        const ws = XLSX.utils.json_to_sheet(tasks, {
+            header: ["id", "name", "description", "estimatedTime", "investedTime", "position"]
+        });
+
+        // Create a new Workbook
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Tasks");
+
+        // Export
+        XLSX.writeFile(wb, "Tasks_Export.xlsx");
+    }
+
+
+
+    
+
+    // Open Modal for new Task
+    function openNewTaskModal() {
+        // Empty the input field for the description 
+        document.getElementById("newTaskName").value = "";
+        document.getElementById("newTaskDescription").value = "";
+        newTaskDuration = 0;
+        updateNewTaskDurationDisplay();
+
+        // Open Modal
+        document.getElementById("newTaskModal").style.display = "flex";
+    }
+
+    function closeNewTaskModal() {
+        document.getElementById("newTaskModal").style.display = "none";
+    }
+
+    function increaseNewTaskDuration() {
+        newTaskDuration += 5;
+        updateNewTaskDurationDisplay();
+    }
+
+    function decreaseNewTaskDuration() {
+        if (newTaskDuration > 0) {
+            newTaskDuration -= 5;
+            updateNewTaskDurationDisplay();
+        }
+    }
+
+    function updateNewTaskDurationDisplay() {
+        const hours = Math.floor(newTaskDuration / 60);
+        const minutes = newTaskDuration % 60;
+        let display = "";
+        if (hours > 0) display += `${hours}h `;
+        //if (minutes > 0) display += `${minutes}m`;
+        if (minutes > 0 || hours === 0) display += `${minutes}m`; // Shows Minutes, even if 0 hours
+        document.getElementById("newTaskEstimatedDuration").innerText = display.trim();
+    }
+
+    function createNewTask() {
+        const taskName = document.getElementById("newTaskName").value;
+        const taskDescription = document.getElementById("newTaskDescription").value;
+        const taskDuration = document.getElementById("newTaskEstimatedDuration").innerText;
+        const taskPosition = document.getElementById("taskPosition").value;
+
+        if (!taskName) {
+            alert("Please insert a Task-Name.");
+            return;
+        }
+
+        const taskElement = document.createElement("div");
+        taskElement.classList.add("task");
+        taskElement.setAttribute("data-id", taskIdCounter++);
+        taskElement.setAttribute("data-task-name", taskName);
+        taskElement.setAttribute("data-time-invested", 0);
+        taskElement.setAttribute("data-task-description", taskDescription);
+        taskElement.setAttribute("data-estimated-duration", newTaskDuration);
+        taskElement.setAttribute("ondblclick", "openModal(this)");
+        taskElement.innerHTML = `<strong>${taskName}</strong><p class="estimated-time">Estimated Time: ${taskDuration}</p>`;
+
+        document.getElementById(taskPosition).appendChild(taskElement);
+
+        $(taskElement).draggable({
+            revert: "invalid",
+            start: function(event, ui) {
+                $(this).css("z-index", 1000);
+                $(this).css("position", "relative");
+            },
+            stop: function(event, ui) {
+                $(this).css("z-index", "auto");
+                $(this).css("position", "relative");
+            }
+        });
+
+        // Update the dropdown menu
+        const option = document.createElement("option");
+        option.value = taskElement.getAttribute("data-id");
+        option.innerText = taskName;
+        document.getElementById('taskSelector').appendChild(option);
+
+        closeNewTaskModal();
+    }
+
+
+
+
+
+
+
+    // Open Task Details/ Existing Modal
+
+    function openModal(taskElement) {
+        currentTaskElement = taskElement;
+
+        const taskName = taskElement.getAttribute("data-task-name");
+        const taskDescription = taskElement.getAttribute("data-task-description");
+        const estimatedDuration = taskElement.getAttribute("data-estimated-duration");
+        const timeInvested = taskElement.getAttribute("data-time-invested") || 0;
+
+        
+        document.getElementById("taskName").value = taskName;
+        document.getElementById("taskDescription").value = taskDescription;
+        currentDuration = parseInt(estimatedDuration);
+        document.getElementById("timeInvested").innerText = formatTime(timeInvested);
+        updateDurationDisplay();
+        
+        document.getElementById("taskModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("taskModal").style.display = "none";
+    }
+
+    function increaseDuration() {
+        currentDuration += 5;
+        updateDurationDisplay();
+    }
+
+    function decreaseDuration() {
+        if (currentDuration > 0) {
+            currentDuration -= 5;
+            updateDurationDisplay();
+        }
+    }
+
+    function updateDurationDisplay() {
+        const hours = Math.floor(currentDuration / 60);
+        const minutes = currentDuration % 60;
+        let display = "";
+        if (hours > 0) display += `${hours}h `;
+        if (minutes > 0) display += `${minutes}m`;
+        document.getElementById("estimatedDuration").innerText = display.trim();
+    }
+
+    function applyChanges() {
+        const taskName = document.getElementById("taskName").value;
+        const taskDescription = document.getElementById("taskDescription").value;
+        const durationText = document.getElementById("estimatedDuration").innerText;
+
+        currentTaskElement.innerHTML = `<strong>${taskName}</strong><p class="estimated-time">Estimated Duration: ${durationText}</p>`;
+        currentTaskElement.setAttribute("data-task-name", taskName);
+        currentTaskElement.setAttribute("data-task-description", taskDescription);
+        currentTaskElement.setAttribute("data-estimated-duration", currentDuration);
+
+        closeModal();
+    }
+
+    function deleteTask() {
+        const confirmation = confirm("Are you sure you want to delete this task?");
+        if (confirmation) {
+            currentTaskElement.remove(); // Löscht den aktuellen Task
+            document.getElementById("taskModal").style.display = "none"; // Schließt das Modal
+            removeTaskFromDropdown(currentTaskElement.getAttribute("data-id")); // Entfernt den Task aus dem Dropdown
+        }
+    }
+
+    function removeTaskFromDropdown(taskId) {
+        const taskSelector = document.getElementById("taskSelector");
+        for (let i = 0; i < taskSelector.options.length; i++) {
+            if (taskSelector.options[i].value == taskId) {
+                taskSelector.remove(i);
+                break;
+            }
+        }
+    }
+
+    /// Open Calender and Export .ics 
+    function openCalendarModal() {
+        // Take estimated Time
+        const estimatedDuration = document.getElementById("estimatedDuration").innerText;
+        document.getElementById("calendarEstimatedDuration").innerText = estimatedDuration;
+        document.getElementById("calendarModal").style.display = "flex";
+    }
+
+    function closeCalendarModal() {
+        document.getElementById("calendarModal").style.display = "none";
+    }
+
+    function exportToCalendar() {
+        const taskName = document.getElementById("taskName").value;
+        const taskDescription = document.getElementById("taskDescription").value;
+        const calendarDate = document.getElementById("calendarDate").value;
+        const calendarStartTime = document.getElementById("calendarStartTime").value;
+
+        // Calculate Enttime with estimated Time
+        const estimatedDuration = currentDuration; // Minutes
+        const startDateTime = new Date(`${calendarDate}T${calendarStartTime}`);
+        const endDateTime = new Date(startDateTime.getTime() + estimatedDuration * 60000);
+
+        // Format Time for .ics
+        const formatDateTime = (date) => {
+            return date.toISOString().replace(/-|:|\.\d+/g, "");
+        };
+
+        const startFormatted = formatDateTime(startDateTime);
+        const endFormatted = formatDateTime(endDateTime);
+
+        // Create .ics
+        const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:EisenhowerApp
+BEGIN:VEVENT
+UID:${Date.now()}
+DTSTAMP:${startFormatted}
+DTSTART:${startFormatted}
+DTEND:${endFormatted}
+SUMMARY:${taskName}
+DESCRIPTION:${taskDescription}
+END:VEVENT
+END:VCALENDAR
+    `.trim();
+
+        // Create .ics and download
+        const blob = new Blob([icsContent], { type: "text/calendar" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${taskName}.ics`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        closeCalendarModal();
+    }
+
+
+
+    // Save Tasks
+    function saveTasks() {
+        const tasks = [];
+
+        document.querySelectorAll(".task").forEach(task => {
+            tasks.push({
+                id: task.getAttribute("data-id"),
+                name: task.getAttribute("data-task-name"),
+                description: task.getAttribute("data-task-description"),
+                duration: task.getAttribute("data-estimated-duration"),
+                timeInvested: task.getAttribute("data-time-invested"),
+                position: task.closest(".quadrant, .side-rect").id
+            });
+        });
+
+        const json = JSON.stringify(tasks, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "tasks.json";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function loadTasks(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const tasks = JSON.parse(e.target.result);
+                loadTasksIntoUI(tasks);
+            };
+            reader.readAsText(file);
+        }
+    }
+
+
+    // Import Tasks
+    function loadTasksIntoUI(tasks) {
+        document.querySelectorAll(".task").forEach(task => task.remove());
+        const taskSelector = document.getElementById('taskSelector');
+        taskSelector.innerHTML = `<option value="">Select Task</option>`;
+
+        tasks.forEach(task => {
+            const taskElement = document.createElement("div");
+            taskElement.classList.add("task");
+            taskElement.setAttribute("data-id", task.id);
+            taskElement.setAttribute("data-task-name", task.name);
+            taskElement.setAttribute("data-task-description", task.description);
+            taskElement.setAttribute("data-estimated-duration", task.duration);
+            taskElement.setAttribute("data-time-invested", task.timeInvested || 0);
+            taskElement.setAttribute("ondblclick", "openModal(this)");
+
+            // Minutes -> Hours
+            const durationInMinutes = parseInt(task.duration, 10);
+            const hours = Math.floor(durationInMinutes / 60);
+            const minutes = durationInMinutes % 60;
+            let durationDisplay = "";
+            if (hours > 0) {
+                durationDisplay += `${hours}h `;
+            }
+            if (minutes > 0) {
+                durationDisplay += `${minutes}m`;
+            }
+
+            taskElement.innerHTML = `<strong>${task.name}</strong><p class="estimated-time">Estimated Time: ${durationDisplay.trim()}</p>`;
+
+            document.getElementById(task.position).appendChild(taskElement);
+
+            // Update the dropdown menu
+            const option = document.createElement("option");
+            option.value = task.id;
+            option.innerText = task.name;
+            taskSelector.appendChild(option);
+
+            // Initialize draggable Function for new created Task
+            $(taskElement).draggable({
+                revert: "invalid",
+                start: function(event, ui) {
+                    $(this).css("z-index", 1000);
+                    $(this).css("position", "relative");
+                },
+                stop: function(event, ui) {
+                    $(this).css("z-index", "auto");
+                    $(this).css("position", "relative");
+                }
+            });
+        });
+    }
+
+    function toggleDropdown() {
+        var dropdownMenu = document.getElementById("importExportMenu");
+        if (dropdownMenu.style.display === "block") {
+            dropdownMenu.style.display = "none";
+        } else {
+            dropdownMenu.style.display = "block";
+        }
+    }
+
+
+    $(function() {
+        $(".task").draggable({
+            revert: "invalid",
+            start: function(event, ui) {
+                $(this).css("z-index", 1000);
+                $(this).css("position", "relative");
+            },
+            stop: function(event, ui) {
+                $(this).css("z-index", "auto");
+                $(this).css("position", "relative");
+            }
+        });
+
+        $(".quadrant, .side-rect").droppable({
+            accept: ".task",
+            drop: function(event, ui) {
+                $(this).append(ui.draggable);
+                ui.draggable.css({top: 0, left: 0});
+            }
+        });
+
+        $(".quadrant").sortable({
+            axis: "y",
+            containment: "parent",
+        });
+    });
+
+
+
+</script>
+
+</body>
+</html>
