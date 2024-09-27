@@ -251,9 +251,8 @@
 
         /* Customizing of the Tasks */
         .task {
-            width: 360px;
+            width: calc(100% - 20px); /* Dynamische Breite minus Padding/Margin */
             background-color: #7019297a;
-            
             border-radius: 10px;
             padding: 10px;
             margin: 10px 0;
@@ -263,6 +262,7 @@
             font-family: 'Arial', sans-serif;
             height: 80px;
             box-sizing: border-box;
+            word-wrap: break-word;
         }
 
         .task:hover {
@@ -475,11 +475,11 @@
         <div class="dropdown">
             <button class="header-button" id="importExportButton" onclick="toggleDropdown()">Import/Export</button>
             <div class="dropdown-content" id="importExportMenu">
-                <button class="dropdown-item" onclick="saveTasks()">Save Tasks</button>
-                <button class="dropdown-item" onclick="exportToExcel()">Excel Export</button>
                 <!-- Custom file upload button -->
                 <label for="loadTasksInput" class="custom-file-upload">Upload File</label>
                 <input type="file" id="loadTasksInput" class="file-upload" onchange="loadTasks(event)">
+                <button class="dropdown-item" onclick="saveTasks()">Save Tasks</button>
+                <button class="dropdown-item" onclick="exportToExcel()">Excel Export</button>
             </div>
         </div>
     </div>
